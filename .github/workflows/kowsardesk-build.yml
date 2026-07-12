@@ -302,12 +302,19 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
-          exe_path = Path("rustdesk/rustdesk.exe")
+          library_path = Path("rustdesk/librustdesk.dll")
 
-          if not exe_path.exists():
-              raise SystemExit(f"Windows executable not found: {exe_path}")
+          if not library_path.exists():
+              print("Files inside Windows output:")
+              for path in Path("rustdesk").rglob("*"):
+                  if path.is_file():
+                      print(path)
 
-          data = exe_path.read_bytes()
+              raise SystemExit(
+                  f"Windows Rust library not found: {library_path}"
+              )
+
+          data = library_path.read_bytes()
 
           expected_values = {
               "Custom server": b"rustdesk.itmali.ir",
@@ -316,13 +323,15 @@ jobs:
 
           for name, value in expected_values.items():
               if value not in data:
-                  raise SystemExit(f"{name} was not found inside Windows executable")
+                  raise SystemExit(
+                      f"{name} was not found inside {library_path}"
+                  )
 
-              print(f"{name} verified inside Windows executable")
+              print(f"{name} verified inside {library_path}")
 
           print("Windows custom configuration verification passed")
           PY
-
+          
       - name: Copy Runner resource for portable packer
         continue-on-error: true
         shell: bash
