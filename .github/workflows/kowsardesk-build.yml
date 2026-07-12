@@ -326,16 +326,31 @@ jobs:
           sed -i '/dpiAware/d' res/manifest.xml
 
           pushd ./libs/portable
+
+          echo "Cleaning old portable build..."
+          cargo clean
+
           pip3 install -r requirements.txt
+
           python3 ./generate.py \
             -f ../../rustdesk/ \
             -o . \
             -e ../../rustdesk/rustdesk.exe
+
           popd
 
-          mv \
-            ./target/release/rustdesk-portable-packer.exe \
-            ./KowsarDesk-${{ env.VERSION }}-windows-x64.exe
+          portable_exe="$(find . -path '*/target/release/rustdesk-portable-packer.exe' -print -quit)"
+
+          if [ -z "$portable_exe" ]; then
+            echo "Portable executable was not generated"
+            exit 1
+          fi
+
+          echo "Portable executable found at: $portable_exe"
+
+          cp \
+            "$portable_exe" \
+            "./KowsarDesk-${{ env.VERSION }}-windows-x64.exe"
 
       - name: Upload Windows portable executable
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
