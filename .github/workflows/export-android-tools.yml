@@ -1,0 +1,98 @@
+name: Export Android Command Line Tools
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-android-tools:
+    runs-on: windows-latest
+
+    steps:
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup modern Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ""
+
+      - name: Find and package command-line tools
+        shell: pwsh
+        run: |
+          Write-Host "ANDROID_SDK_ROOT = $env:ANDROID_SDK_ROOT"
+          Write-Host "ANDROID_HOME = $env:ANDROID_HOME"
+
+          if ($env:ANDROID_SDK_ROOT) {
+            $sdkRoot = $env:ANDROID_SDK_ROOT
+          }
+          elseif ($env:ANDROID_HOME) {
+            $sdkRoot = $env:ANDROID_HOME
+          }
+          else {
+            throw "Android SDK path was not found."
+          }
+
+          $cmdlineRoot = Join-Path $sdkRoot "cmdline-tools"
+
+          if (-not (Test-Path $cmdlineRoot)) {
+            throw "cmdline-tools directory was not found: $cmdlineRoot"
+          }
+
+          $sdkManager = Get-ChildItem `
+            -Path $cmdlineRoot `
+            -Filter "sdkmanager.bat" `
+            -Recurse `
+            -File |
+            Select-Object -First 1
+
+          if (-not $sdkManager) {
+            throw "Modern sdkmanager.bat was not found."
+          }
+
+          Write-Host "sdkmanager found at:"
+          Write-Host $sdkManager.FullName
+
+          # sdkmanager.bat is inside: cmdline-tools\<version>\bin
+          $binDirectory = Split-Path $sdkManager.FullName -Parent
+          $sourceDirectory = Split-Path $binDirectory -Parent
+
+          $artifactRoot = Join-Path $env:RUNNER_TEMP "android-command-line-tools"
+          $destination = Join-Path $artifactRoot "latest"
+
+          New-Item `
+            -ItemType Directory `
+            -Path $destination `
+            -Force |
+            Out-Null
+
+          Copy-Item `
+            -Path (Join-Path $sourceDirectory "*") `
+            -Destination $destination `
+            -Recurse `
+            -Force
+
+          $copiedSdkManager = Join-Path $destination "bin\sdkmanager.bat"
+
+          if (-not (Test-Path $copiedSdkManager)) {
+            throw "sdkmanager.bat was not copied correctly."
+          }
+
+          Write-Host "Testing copied sdkmanager:"
+          & $copiedSdkManager --version
+
+          Write-Host "Packaged files:"
+          Get-ChildItem $artifactRoot -Recurse |
+            Select-Object FullName
+
+      - name: Upload Android command-line tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-command-line-tools-windows
+          path: ${{ runner.temp }}\android-command-line-tools
+          retention-days: 7
