@@ -22,8 +22,8 @@ env:
   VERSION: "1.4.9"
   NDK_VERSION: "r28c"
 
-  RS_PUB_KEY: "${{ secrets.RS_PUB_KEY }}"
-  RENDEZVOUS_SERVER: "${{ secrets.RENDEZVOUS_SERVER }}"
+  RS_PUB_KEY: "J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8="
+  RENDEZVOUS_SERVER: "rustdesk.itmali.ir"
 
 jobs:
   generate-bridge:
