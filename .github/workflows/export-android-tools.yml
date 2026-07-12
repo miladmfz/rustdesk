@@ -11,65 +11,56 @@ jobs:
     runs-on: windows-2025
 
     steps:
-      - name: Find Android command-line tools
+      - name: Download latest Android command-line tools
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
 
-          Write-Host "ANDROID_HOME: $env:ANDROID_HOME"
-          Write-Host "ANDROID_SDK_ROOT: $env:ANDROID_SDK_ROOT"
+          $page = Invoke-WebRequest `
+            -Uri "https://developer.android.com/studio" `
+            -UseBasicParsing
 
-          if ($env:ANDROID_HOME) {
-            $sdkRoot = $env:ANDROID_HOME
-          }
-          elseif ($env:ANDROID_SDK_ROOT) {
-            $sdkRoot = $env:ANDROID_SDK_ROOT
-          }
-          else {
-            throw "ANDROID_HOME and ANDROID_SDK_ROOT are empty."
-          }
+          $pattern = 'https://dl\.google\.com/android/repository/commandlinetools-win-[0-9]+_latest\.zip'
 
-          if (-not (Test-Path $sdkRoot)) {
-            throw "Android SDK directory does not exist: $sdkRoot"
+          $match = [regex]::Match($page.Content, $pattern)
+
+          if (-not $match.Success) {
+            throw "Latest Windows command-line tools URL was not found."
           }
 
-          $cmdlineRoot = Join-Path $sdkRoot "cmdline-tools"
+          $downloadUrl = $match.Value
 
-          if (-not (Test-Path $cmdlineRoot)) {
-            throw "cmdline-tools directory does not exist: $cmdlineRoot"
+          Write-Host "Download URL:"
+          Write-Host $downloadUrl
+
+          $zipPath = Join-Path $env:RUNNER_TEMP "android-command-line-tools.zip"
+          $extractPath = Join-Path $env:RUNNER_TEMP "android-extracted"
+          $artifactRoot = Join-Path $env:RUNNER_TEMP "android-command-line-tools"
+          $destination = Join-Path $artifactRoot "latest"
+
+          Invoke-WebRequest `
+            -Uri $downloadUrl `
+            -OutFile $zipPath `
+            -UseBasicParsing
+
+          $zipSize = (Get-Item $zipPath).Length
+
+          Write-Host "Downloaded size: $zipSize bytes"
+
+          if ($zipSize -lt 100MB) {
+            throw "Downloaded file is too small."
           }
 
-          Write-Host "Searching inside: $cmdlineRoot"
+          Expand-Archive `
+            -Path $zipPath `
+            -DestinationPath $extractPath `
+            -Force
 
-          $sdkManager = Get-ChildItem `
-            -Path $cmdlineRoot `
-            -Filter "sdkmanager.bat" `
-            -File `
-            -Recurse |
-            Select-Object -First 1
+          $source = Join-Path $extractPath "cmdline-tools"
 
-          if (-not $sdkManager) {
-            Write-Host "Contents of Android SDK:"
-            Get-ChildItem $sdkRoot -Recurse -Depth 3 |
-              Select-Object FullName
-
+          if (-not (Test-Path (Join-Path $source "bin\sdkmanager.bat"))) {
             throw "sdkmanager.bat was not found."
           }
-
-          Write-Host "sdkmanager found:"
-          Write-Host $sdkManager.FullName
-
-          $binDirectory = $sdkManager.Directory
-          $sourceDirectory = $binDirectory.Parent.FullName
-
-          Write-Host "Command-line tools source:"
-          Write-Host $sourceDirectory
-
-          $artifactRoot = Join-Path `
-            $env:RUNNER_TEMP `
-            "android-command-line-tools"
-
-          $destination = Join-Path $artifactRoot "latest"
 
           New-Item `
             -ItemType Directory `
@@ -78,25 +69,15 @@ jobs:
             Out-Null
 
           Copy-Item `
-            -Path (Join-Path $sourceDirectory "*") `
+            -Path (Join-Path $source "*") `
             -Destination $destination `
             -Recurse `
             -Force
 
-          $copiedSdkManager = Join-Path `
-            $destination `
-            "bin\sdkmanager.bat"
+          $sdkManager = Join-Path $destination "bin\sdkmanager.bat"
 
-          if (-not (Test-Path $copiedSdkManager)) {
-            throw "sdkmanager.bat was not copied correctly."
-          }
-
-          Write-Host "Testing copied sdkmanager:"
-          & $copiedSdkManager --version
-
-          Write-Host "Artifact directory:"
-          Get-ChildItem $artifactRoot -Recurse |
-            Select-Object FullName
+          Write-Host "Testing sdkmanager:"
+          & $sdkManager --version
 
       - name: Upload Android command-line tools
         uses: actions/upload-artifact@v4
