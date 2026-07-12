@@ -58,6 +58,48 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Patch custom server and public key
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("libs/hbb_common/src/config.rs")
+
+          if not path.exists():
+              raise SystemExit(f"File not found: {path}")
+
+          content = path.read_text(encoding="utf-8")
+
+          content, server_count = re.subn(
+              r'pub const RENDEZVOUS_SERVERS: &\[&str\] = &\[[^\n]*\];',
+              'pub const RENDEZVOUS_SERVERS: &[&str] = &["rustdesk.itmali.ir"];',
+              content,
+              count=1,
+          )
+
+          content, key_count = re.subn(
+              r'pub const RS_PUB_KEY: &str = "[^"]*";',
+              'pub const RS_PUB_KEY: &str = "J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=";',
+              content,
+              count=1,
+          )
+
+          if server_count != 1:
+              raise SystemExit("RENDEZVOUS_SERVERS was not patched")
+
+          if key_count != 1:
+              raise SystemExit("RS_PUB_KEY was not patched")
+
+          path.write_text(content, encoding="utf-8")
+
+          print("Custom server and public key patched successfully")
+          PY
+
+          grep -F 'rustdesk.itmali.ir' libs/hbb_common/src/config.rs
+          grep -F 'J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=' libs/hbb_common/src/config.rs
+
       - name: Restore bridge files
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
@@ -368,6 +410,48 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           submodules: recursive
+
+      - name: Patch custom server and public key
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("libs/hbb_common/src/config.rs")
+
+          if not path.exists():
+              raise SystemExit(f"File not found: {path}")
+
+          content = path.read_text(encoding="utf-8")
+
+          content, server_count = re.subn(
+              r'pub const RENDEZVOUS_SERVERS: &\[&str\] = &\[[^\n]*\];',
+              'pub const RENDEZVOUS_SERVERS: &[&str] = &["rustdesk.itmali.ir"];',
+              content,
+              count=1,
+          )
+
+          content, key_count = re.subn(
+              r'pub const RS_PUB_KEY: &str = "[^"]*";',
+              'pub const RS_PUB_KEY: &str = "J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=";',
+              content,
+              count=1,
+          )
+
+          if server_count != 1:
+              raise SystemExit("RENDEZVOUS_SERVERS was not patched")
+
+          if key_count != 1:
+              raise SystemExit("RS_PUB_KEY was not patched")
+
+          path.write_text(content, encoding="utf-8")
+
+          print("Custom server and public key patched successfully")
+          PY
+
+          grep -F 'rustdesk.itmali.ir' libs/hbb_common/src/config.rs
+          grep -F 'J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=' libs/hbb_common/src/config.rs
 
       - name: Install Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
