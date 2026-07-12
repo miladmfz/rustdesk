@@ -1,0 +1,498 @@
+name: KowsarDesk Windows Android Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kowsardesk-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SCITER_RUST_VERSION: "1.75"
+  RUST_VERSION: "1.75"
+  CARGO_NDK_VERSION: "3.1.2"
+  LLVM_VERSION: "15.0.6"
+  FLUTTER_VERSION: "3.24.5"
+  ANDROID_FLUTTER_VERSION: "3.24.5"
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+  VCPKG_COMMIT_ID: "120deac3062162151622ca4860575a33844ba10b"
+  VERSION: "1.4.9"
+  NDK_VERSION: "r28c"
+
+  RS_PUB_KEY: "${{ secrets.RS_PUB_KEY }}"
+  RENDEZVOUS_SERVER: "${{ secrets.RENDEZVOUS_SERVER }}"
+
+jobs:
+  generate-bridge:
+    uses: ./.github/workflows/bridge.yml
+
+  build-topmost-window-x64:
+    uses: ./.github/workflows/third-party-RustDeskTempTopMostWindow.yml
+    with:
+      upload-artifact: true
+      target: windows-2022
+      configuration: Release
+      platform: x64
+      target_version: Windows10
+
+  build-windows-x64:
+    name: Windows x64
+    needs:
+      - generate-bridge
+      - build-topmost-window-x64
+    runs-on: windows-2022
+
+    steps:
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Checkout source code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          submodules: recursive
+
+      - name: Restore bridge files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: bridge-artifact
+          path: ./
+
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0
+        with:
+          version: ${{ env.LLVM_VERSION }}
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@2783a3f08e1baf891508463f8c6653c258246225
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          architecture: x64
+
+      - name: Replace engine with RustDesk custom Flutter engine
+        shell: pwsh
+        run: |
+          flutter doctor -v
+          flutter precache --windows
+
+          Invoke-WebRequest `
+            -Uri "https://github.com/rustdesk/engine/releases/download/main/windows-x64-release.zip" `
+            -OutFile "windows-x64-release.zip"
+
+          Expand-Archive `
+            -Path "windows-x64-release.zip" `
+            -DestinationPath "windows-x64-release"
+
+          Move-Item `
+            -Path "windows-x64-release/*" `
+            -Destination "C:/hostedtoolcache/windows/flutter/stable-${{ env.FLUTTER_VERSION }}-x64/bin/cache/artifacts/engine/windows-x64-release/" `
+            -Force
+
+      - name: Patch Flutter
+        shell: bash
+        run: |
+          cp .github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff "$(dirname "$(dirname "$(which flutter)")")"
+          cd "$(dirname "$(dirname "$(which flutter)")")"
+          git apply flutter_3.24.4_dropdown_menu_enableFilter.diff
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+        with:
+          toolchain: ${{ env.SCITER_RUST_VERSION }}
+          targets: x86_64-pc-windows-msvc
+          components: rustfmt
+
+      - name: Restore Rust cache
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+        with:
+          prefix-key: windows-2022-x64
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2
+        with:
+          vcpkgDirectory: C:\vcpkg
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
+          doNotCache: false
+
+      - name: Install vcpkg dependencies
+        shell: bash
+        env:
+          VCPKG_DEFAULT_HOST_TRIPLET: x64-windows-static
+        run: |
+          if ! "$VCPKG_ROOT/vcpkg" \
+            install \
+            --triplet x64-windows-static \
+            --x-install-root="$VCPKG_ROOT/installed"; then
+
+            find "$VCPKG_ROOT/" -name "*.log" | while read -r log_file; do
+              echo "$log_file:"
+              echo "======"
+              cat "$log_file"
+              echo "======"
+            done
+
+            exit 1
+          fi
+
+          head -n 100 "$VCPKG_ROOT/buildtrees/ffmpeg/build-x64-windows-static-rel-out.log" || true
+
+      - name: Build KowsarDesk for Windows x64
+        shell: pwsh
+        run: |
+          python3 .\build.py `
+            --portable `
+            --flutter `
+            --skip-portable-pack `
+            --hwcodec `
+            --vram
+
+          Move-Item `
+            -Path ".\flutter\build\windows\x64\runner\Release" `
+            -Destination ".\rustdesk"
+
+          Invoke-WebRequest `
+            -Uri "https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip" `
+            -OutFile "usbmmidd_v2.zip"
+
+          Expand-Archive `
+            -Path "usbmmidd_v2.zip" `
+            -DestinationPath "."
+
+          Remove-Item `
+            -Path "usbmmidd_v2\Win32" `
+            -Recurse `
+            -Force `
+            -ErrorAction SilentlyContinue
+
+          Remove-Item `
+            -Path @(
+              "usbmmidd_v2\deviceinstaller64.exe",
+              "usbmmidd_v2\deviceinstaller.exe",
+              "usbmmidd_v2\usbmmidd.bat"
+            ) `
+            -Force `
+            -ErrorAction SilentlyContinue
+
+          Move-Item `
+            -Path ".\usbmmidd_v2" `
+            -Destination ".\rustdesk" `
+            -Force
+
+          try {
+            Invoke-WebRequest `
+              -Uri "https://github.com/rustdesk/hbb_common/releases/download/driver/rustdesk_printer_driver_v4-1.4.zip" `
+              -OutFile "rustdesk_printer_driver_v4-1.4.zip"
+
+            Invoke-WebRequest `
+              -Uri "https://github.com/rustdesk/hbb_common/releases/download/driver/printer_driver_adapter.zip" `
+              -OutFile "printer_driver_adapter.zip"
+
+            Invoke-WebRequest `
+              -Uri "https://github.com/rustdesk/hbb_common/releases/download/driver/sha256sums" `
+              -OutFile "sha256sums"
+
+            $driverExpected = (
+              Select-String `
+                -Path ".\sha256sums" `
+                -Pattern '^([a-fA-F0-9]{64}) \*rustdesk_printer_driver_v4-1.4\.zip$'
+            ).Matches.Groups[1].Value
+
+            $adapterExpected = (
+              Select-String `
+                -Path ".\sha256sums" `
+                -Pattern '^([a-fA-F0-9]{64}) \*printer_driver_adapter\.zip$'
+            ).Matches.Groups[1].Value
+
+            $driverActual = (
+              Get-FileHash `
+                -Path "rustdesk_printer_driver_v4-1.4.zip" `
+                -Algorithm SHA256
+            ).Hash
+
+            $adapterActual = (
+              Get-FileHash `
+                -Path "printer_driver_adapter.zip" `
+                -Algorithm SHA256
+            ).Hash
+
+            if (
+              $driverExpected -eq $driverActual -and
+              $adapterExpected -eq $adapterActual
+            ) {
+              Expand-Archive `
+                -Path "rustdesk_printer_driver_v4-1.4.zip" `
+                -DestinationPath "."
+
+              New-Item `
+                -ItemType Directory `
+                -Path ".\rustdesk\drivers" `
+                -Force | Out-Null
+
+              Move-Item `
+                -Path ".\rustdesk_printer_driver_v4-1.4" `
+                -Destination ".\rustdesk\drivers\RustDeskPrinterDriver" `
+                -Force
+
+              Expand-Archive `
+                -Path "printer_driver_adapter.zip" `
+                -DestinationPath "."
+
+              Move-Item `
+                -Path ".\printer_driver_adapter.dll" `
+                -Destination ".\rustdesk" `
+                -Force
+            }
+          }
+          catch {
+            Write-Host "Printer driver files were skipped."
+          }
+
+      - name: Copy Runner resource for portable packer
+        continue-on-error: true
+        shell: bash
+        run: |
+          runner_res="$(find . -name "Runner.res" | head -n 1)"
+
+          if [ -n "$runner_res" ]; then
+            cp "$runner_res" ./libs/portable/Runner.res
+          fi
+
+      - name: Download TopMostWindow x64 artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: topmostwindow-artifacts-x64
+          path: ./rustdesk
+
+      - name: Upload Windows x64 folder
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KowsarDesk-windows-x64-folder
+          path: rustdesk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build Windows portable executable
+        shell: bash
+        run: |
+          sed -i '/dpiAware/d' res/manifest.xml
+
+          pushd ./libs/portable
+          pip3 install -r requirements.txt
+          python3 ./generate.py \
+            -f ../../rustdesk/ \
+            -o . \
+            -e ../../rustdesk/rustdesk.exe
+          popd
+
+          mv \
+            ./target/release/rustdesk-portable-packer.exe \
+            ./KowsarDesk-${{ env.VERSION }}-windows-x64.exe
+
+      - name: Upload Windows portable executable
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KowsarDesk-windows-x64-portable
+          path: KowsarDesk-${{ env.VERSION }}-windows-x64.exe
+          if-no-files-found: error
+          retention-days: 7
+
+  build-android-arm64:
+    name: Android arm64-v8a
+    needs:
+      - generate-bridge
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: false
+
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            curl \
+            gcc-multilib \
+            git \
+            g++ \
+            g++-multilib \
+            libayatana-appindicator3-dev \
+            libasound2-dev \
+            libc6-dev \
+            libclang-dev \
+            libunwind-dev \
+            libgstreamer1.0-dev \
+            libgstreamer-plugins-base1.0-dev \
+            libgtk-3-dev \
+            libpam0g-dev \
+            libpulse-dev \
+            libva-dev \
+            libxcb-randr0-dev \
+            libxcb-shape0-dev \
+            libxcb-xfixes0-dev \
+            libxdo-dev \
+            libxfixes-dev \
+            llvm-dev \
+            nasm \
+            ninja-build \
+            openjdk-17-jdk-headless \
+            pkg-config \
+            tree \
+            wget
+
+      - name: Checkout source code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          submodules: recursive
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ env.ANDROID_FLUTTER_VERSION }}
+
+      - name: Patch Flutter
+        shell: bash
+        run: |
+          cd "$(dirname "$(dirname "$(which flutter)")")"
+          git apply "${{ github.workspace }}/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff"
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779
+        id: setup-ndk
+        with:
+          ndk-version: ${{ env.NDK_VERSION }}
+          add-to-path: true
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2
+        with:
+          vcpkgDirectory: /opt/artifacts/vcpkg
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
+          doNotCache: false
+
+      - name: Install Android arm64 dependencies
+        shell: bash
+        run: |
+          if ! ./flutter/build_android_deps.sh "arm64-v8a"; then
+            find "$VCPKG_ROOT/" -name "*.log" | while read -r log_file; do
+              echo "$log_file:"
+              echo "======"
+              cat "$log_file"
+              echo "======"
+            done
+
+            exit 1
+          fi
+
+      - name: Restore bridge files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: bridge-artifact
+          path: ./
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt
+          targets: aarch64-linux-android
+
+      - name: Restore Rust cache
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+        with:
+          prefix-key: rustdesk-lib-cache-android
+          key: aarch64-linux-android
+
+      - name: Build RustDesk Android arm64 library
+        shell: bash
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          rustup target add aarch64-linux-android
+
+          cargo install \
+            cargo-ndk \
+            --version "${{ env.CARGO_NDK_VERSION }}" \
+            --locked
+
+          ./flutter/ndk_arm64.sh
+
+          mkdir -p ./flutter/android/app/src/main/jniLibs/arm64-v8a
+
+          cp \
+            ./target/aarch64-linux-android/release/liblibrustdesk.so \
+            ./flutter/android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
+
+      - name: Build Android arm64 APK
+        shell: bash
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          export PATH="/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH"
+
+          sed -i \
+            "s/org.gradle.jvmargs=-Xmx1024M/org.gradle.jvmargs=-Xmx2g/g" \
+            ./flutter/android/gradle.properties
+
+          sed -i \
+            "s/signingConfigs.release/signingConfigs.debug/g" \
+            ./flutter/android/app/build.gradle
+
+          mkdir -p ./flutter/android/app/src/main/jniLibs/arm64-v8a
+
+          cp \
+            "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so" \
+            ./flutter/android/app/src/main/jniLibs/arm64-v8a/
+
+          cp \
+            ./target/aarch64-linux-android/release/liblibrustdesk.so \
+            ./flutter/android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
+
+          pushd flutter
+
+          flutter build apk \
+            --release \
+            --target-platform android-arm64 \
+            --split-per-abi
+
+          mv \
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+            ../KowsarDesk-${{ env.VERSION }}-android-arm64.apk
+
+          popd
+
+      - name: Upload Android arm64 APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KowsarDesk-android-arm64
+          path: KowsarDesk-${{ env.VERSION }}-android-arm64.apk
+          if-no-files-found: error
+          retention-days: 7
