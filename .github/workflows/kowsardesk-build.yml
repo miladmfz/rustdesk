@@ -296,6 +296,33 @@ jobs:
             Write-Host "Printer driver files were skipped."
           }
 
+      - name: Verify Windows custom server and public key
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          exe_path = Path("rustdesk/rustdesk.exe")
+
+          if not exe_path.exists():
+              raise SystemExit(f"Windows executable not found: {exe_path}")
+
+          data = exe_path.read_bytes()
+
+          expected_values = {
+              "Custom server": b"rustdesk.itmali.ir",
+              "Public key": b"J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=",
+          }
+
+          for name, value in expected_values.items():
+              if value not in data:
+                  raise SystemExit(f"{name} was not found inside Windows executable")
+
+              print(f"{name} verified inside Windows executable")
+
+          print("Windows custom configuration verification passed")
+          PY
+
       - name: Copy Runner resource for portable packer
         continue-on-error: true
         shell: bash
@@ -587,6 +614,41 @@ jobs:
             ../KowsarDesk-${{ env.VERSION }}-android-arm64.apk
 
           popd
+
+      - name: Verify Android APK custom server and public key
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          apk_path = Path("KowsarDesk-1.4.9-android-arm64.apk")
+          library_path = "lib/arm64-v8a/librustdesk.so"
+
+          if not apk_path.exists():
+              raise SystemExit(f"Android APK not found: {apk_path}")
+
+          with ZipFile(apk_path, "r") as apk:
+              if library_path not in apk.namelist():
+                  raise SystemExit(
+                      f"Native Android library not found inside APK: {library_path}"
+                  )
+
+              data = apk.read(library_path)
+
+          expected_values = {
+              "Custom server": b"rustdesk.itmali.ir",
+              "Public key": b"J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=",
+          }
+
+          for name, value in expected_values.items():
+              if value not in data:
+                  raise SystemExit(f"{name} was not found inside Android APK")
+
+              print(f"{name} verified inside Android APK")
+
+          print("Android custom configuration verification passed")
+          PY
 
       - name: Upload Android arm64 APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
