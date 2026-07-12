@@ -11,56 +11,66 @@ jobs:
     runs-on: windows-2025
 
     steps:
-      - name: Download latest Android command-line tools
+      - name: Setup Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup modern Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ""
+
+      - name: Package Android command-line tools
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
 
-          $page = Invoke-WebRequest `
-            -Uri "https://developer.android.com/studio" `
-            -UseBasicParsing
+          Write-Host "ANDROID_HOME: $env:ANDROID_HOME"
+          Write-Host "ANDROID_SDK_ROOT: $env:ANDROID_SDK_ROOT"
 
-          $pattern = 'https://dl\.google\.com/android/repository/commandlinetools-win-[0-9]+_latest\.zip'
-
-          $match = [regex]::Match($page.Content, $pattern)
-
-          if (-not $match.Success) {
-            throw "Latest Windows command-line tools URL was not found."
+          if ($env:ANDROID_SDK_ROOT) {
+            $sdkRoot = $env:ANDROID_SDK_ROOT
+          }
+          elseif ($env:ANDROID_HOME) {
+            $sdkRoot = $env:ANDROID_HOME
+          }
+          else {
+            throw "Android SDK environment variables are empty."
           }
 
-          $downloadUrl = $match.Value
+          $cmdlineRoot = Join-Path $sdkRoot "cmdline-tools"
 
-          Write-Host "Download URL:"
-          Write-Host $downloadUrl
-
-          $zipPath = Join-Path $env:RUNNER_TEMP "android-command-line-tools.zip"
-          $extractPath = Join-Path $env:RUNNER_TEMP "android-extracted"
-          $artifactRoot = Join-Path $env:RUNNER_TEMP "android-command-line-tools"
-          $destination = Join-Path $artifactRoot "latest"
-
-          Invoke-WebRequest `
-            -Uri $downloadUrl `
-            -OutFile $zipPath `
-            -UseBasicParsing
-
-          $zipSize = (Get-Item $zipPath).Length
-
-          Write-Host "Downloaded size: $zipSize bytes"
-
-          if ($zipSize -lt 100MB) {
-            throw "Downloaded file is too small."
+          if (-not (Test-Path $cmdlineRoot)) {
+            throw "cmdline-tools directory was not found: $cmdlineRoot"
           }
 
-          Expand-Archive `
-            -Path $zipPath `
-            -DestinationPath $extractPath `
-            -Force
+          $sdkManager = Get-ChildItem `
+            -Path $cmdlineRoot `
+            -Filter "sdkmanager.bat" `
+            -File `
+            -Recurse |
+            Select-Object -First 1
 
-          $source = Join-Path $extractPath "cmdline-tools"
+          if (-not $sdkManager) {
+            Get-ChildItem $cmdlineRoot -Recurse |
+              Select-Object FullName
 
-          if (-not (Test-Path (Join-Path $source "bin\sdkmanager.bat"))) {
             throw "sdkmanager.bat was not found."
           }
+
+          Write-Host "Found sdkmanager:"
+          Write-Host $sdkManager.FullName
+
+          $binDirectory = $sdkManager.Directory.FullName
+          $sourceDirectory = Split-Path $binDirectory -Parent
+
+          $artifactRoot = Join-Path `
+            $env:RUNNER_TEMP `
+            "android-command-line-tools"
+
+          $destination = Join-Path $artifactRoot "latest"
 
           New-Item `
             -ItemType Directory `
@@ -69,15 +79,27 @@ jobs:
             Out-Null
 
           Copy-Item `
-            -Path (Join-Path $source "*") `
+            -Path (Join-Path $sourceDirectory "*") `
             -Destination $destination `
             -Recurse `
             -Force
 
-          $sdkManager = Join-Path $destination "bin\sdkmanager.bat"
+          $copiedSdkManager = Join-Path `
+            $destination `
+            "bin\sdkmanager.bat"
 
-          Write-Host "Testing sdkmanager:"
-          & $sdkManager --version
+          if (-not (Test-Path $copiedSdkManager)) {
+            throw "Copied sdkmanager.bat was not found."
+          }
+
+          Write-Host "Testing packaged sdkmanager:"
+          & $copiedSdkManager --version
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "sdkmanager test failed with exit code $LASTEXITCODE"
+          }
+
+          Write-Host "Package completed successfully."
 
       - name: Upload Android command-line tools
         uses: actions/upload-artifact@v4
