@@ -100,6 +100,46 @@ jobs:
           grep -F 'rustdesk.itmali.ir' libs/hbb_common/src/config.rs
           grep -F 'J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=' libs/hbb_common/src/config.rs
 
+      - name: Verify forced KowsarDesk network settings
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/common.rs")
+
+          if not path.exists():
+              raise SystemExit(f"File not found: {path}")
+
+          content = path.read_text(encoding="utf-8")
+
+          required_values = [
+              '*config::APP_NAME.write().unwrap() = "KowsarDesk".to_owned();',
+              'config::OVERWRITE_SETTINGS.write().unwrap()',
+              '"custom-rendezvous-server".to_owned()',
+              '"relay-server".to_owned()',
+              '"key".to_owned()',
+              '"rustdesk.itmali.ir".to_owned()',
+              '"J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=".to_owned()',
+          ]
+
+          missing = [
+              value
+              for value in required_values
+              if value not in content
+          ]
+
+          if missing:
+              print("Missing forced KowsarDesk settings:")
+
+              for value in missing:
+                  print(f"- {value}")
+
+              raise SystemExit(1)
+
+          print("Forced KowsarDesk network settings verified")
+          PY
+
       - name: Restore bridge files
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
@@ -503,6 +543,46 @@ jobs:
 
           grep -F 'rustdesk.itmali.ir' libs/hbb_common/src/config.rs
           grep -F 'J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=' libs/hbb_common/src/config.rs
+
+      - name: Verify forced KowsarDesk network settings
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/common.rs")
+
+          if not path.exists():
+              raise SystemExit(f"File not found: {path}")
+
+          content = path.read_text(encoding="utf-8")
+
+          required_values = [
+              '*config::APP_NAME.write().unwrap() = "KowsarDesk".to_owned();',
+              'config::OVERWRITE_SETTINGS.write().unwrap()',
+              '"custom-rendezvous-server".to_owned()',
+              '"relay-server".to_owned()',
+              '"key".to_owned()',
+              '"rustdesk.itmali.ir".to_owned()',
+              '"J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=".to_owned()',
+          ]
+
+          missing = [
+              value
+              for value in required_values
+              if value not in content
+          ]
+
+          if missing:
+              print("Missing forced KowsarDesk settings:")
+
+              for value in missing:
+                  print(f"- {value}")
+
+              raise SystemExit(1)
+
+          print("Forced KowsarDesk network settings verified")
+          PY
 
       - name: Install Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
