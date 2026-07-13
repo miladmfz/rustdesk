@@ -2081,6 +2081,26 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
 }
 
 pub fn load_custom_client() {
+    *config::APP_NAME.write().unwrap() = "KowsarDesk".to_owned();
+
+    {
+        let mut settings = config::HARD_SETTINGS.write().unwrap();
+
+        settings.insert(
+            "custom-rendezvous-server".to_owned(),
+            "rustdesk.itmali.ir".to_owned(),
+        );
+
+        settings.insert(
+            "relay-server".to_owned(),
+            "rustdesk.itmali.ir".to_owned(),
+        );
+
+        settings.insert(
+            "key".to_owned(),
+            "J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=".to_owned(),
+        );
+    }
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
