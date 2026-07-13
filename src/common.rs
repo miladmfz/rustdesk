@@ -2084,7 +2084,7 @@ pub fn load_custom_client() {
     *config::APP_NAME.write().unwrap() = "KowsarDesk".to_owned();
 
     {
-        let mut settings = config::HARD_SETTINGS.write().unwrap();
+        let mut settings = config::OVERWRITE_SETTINGS.write().unwrap();
 
         settings.insert(
             "custom-rendezvous-server".to_owned(),
