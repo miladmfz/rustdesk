@@ -2100,6 +2100,25 @@ pub fn load_custom_client() {
             "key".to_owned(),
             "J13ptcHYlTrOkHt0zKumvKuga+Ds+zc2hnW6u0DZPL8=".to_owned(),
         );
+
+        settings.insert(
+            "approve-mode".to_owned(),
+            "password".to_owned(),
+        );
+        
+        settings.insert(
+            "verification-method".to_owned(),
+            "use-permanent-password".to_owned(),
+        );
+        
+    }
+    {
+        let mut hard_settings = config::HARD_SETTINGS.write().unwrap();
+
+        hard_settings.insert(
+            "password".to_owned(),
+            "Aa@123456".to_owned(),
+        );
     }
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
