@@ -64,3 +64,52 @@ re-enable control can be inspected. No sign-in credentials are requested in chat
 Next: use that control if available, dispatch codex/kowsardesk-portable-fix, and
 verify build, installation smoke and downloadable artifacts. If GitHub instead
 requires Support review, capture the exact signed-in message before escalating.
+
+## Verified release checkpoint — 2026-10-24
+
+The maintainer signed in and restored the fork-specific Actions execution state.
+No Support request was needed. Flutter Nightly Build remains disabled.
+
+Successful complete workflow:
+https://github.com/miladmfz/rustdesk/actions/runs/40069595938
+Built source commit: cff4d708dee86d0a4338b258dea695ca08db6617.
+Both Windows x64 and Android arm64-v8a jobs completed successfully.
+
+The first attempt, run 40066006305, compiled both platforms but its initial
+installation smoke step timed out after five minutes: Start-Process -Wait also
+waited for the persistent tray descendant. The corrected smoke script starts the
+portable installer asynchronously, polls for the installed file and running
+service for at most 90 seconds, and bounds the version process to 30 seconds.
+It stops the service and tray on the disposable hosted runner afterward.
+
+Verified evidence:
+
+- Five packaging regression tests passed; the renamed binary and dependencies
+  are validated before packing.
+- One real local launcher/tray process validation passed. A separate bounded
+  version-process check passed for exit code and redirected stdout.
+- Workflow YAML, 20 shell script blocks, embedded Python and PowerShell syntax
+  checks passed; git diff --check passed.
+- Hosted Windows smoke passed: installed KowsarDesk.exe exists, its service runs
+  from the expected path, its SHA256 matches the staged binary, and --version
+  returns 1.4.9. Windows artifact uploads passed after this check.
+- Android APK build and embedded custom-configuration verification passed.
+- All five release ZIPs were downloaded. Their SHA256 values match GitHub artifact
+  metadata and ZIP integrity checks passed. Both Windows executable hashes match
+  the published checksum file, and both PE headers identify Windows x64.
+
+Local deliverables are in Downloads/KowsarDesk-1.4.9-verified-20261024, including
+the installer, portable, full folder, Android APK, checksums and verification.json.
+The application version remains 1.4.9; this release repairs packaging and CI.
+
+Changed project files:
+
+- .github/workflows/kowsardesk-build.yml
+- .github/scripts/prepare-kowsardesk.py
+- .github/scripts/test_kowsardesk_packaging.py
+- .github/scripts/smoke-kowsardesk-install.ps1
+- docs/ROADMAP.md
+
+No technical verification blocker remains. Human acceptance on the affected
+user's machine has not been inferred from CI. Next: install the verified Windows
+package on that target machine and confirm its interactive support workflow.
