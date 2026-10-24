@@ -1700,23 +1700,28 @@ copy /Y \"{tmp_path}\\{app_name} Tray.lnk\" \"%PROGRAMDATA%\\Microsoft\\Windows\
     // No need to merge the existing dup code, because the code in these two functions are too critical.
     // New code should be written in a common function.
     let legacy_upgrade = if app_name == "KowsarDesk" {
+        // Capture the caller's cache before run_cmds elevates under another account.
+        let legacy_cache = std::env::var_os("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .ok_or_else(|| anyhow!("Cannot resolve legacy KowsarDesk cache"))?
+            .join("rustdesk");
         let script = write_cmds(
             include_str!("kowsardesk-legacy-upgrade.ps1").to_owned(),
             "ps1",
             "legacy_upgrade",
         )?;
         format!(
-            "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{}\" -InstallDirectory \"{}\"\nif errorlevel 1 exit /b 1",
-            script.to_string_lossy(), path
+            "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{}\" -InstallDirectory \"{}\" -LegacyCacheDirectory \"{}\"\nif errorlevel 1 exit /b 1",
+            script.to_string_lossy(), path, legacy_cache.to_string_lossy()
         )
     } else {
         String::new()
     };
     let cmds = format!(
         "
+chcp 65001
 {legacy_upgrade}
 {uninstall_str}
-chcp 65001
 md \"{path}\"
 {copy_exe}
 reg add {subkey} /f

@@ -33,10 +33,14 @@ try {
     & $script -InstallDirectory 'D:\Custom KowsarDesk'
     if ($global:kowsarTestTerminated.Count -ne 1 -or $global:kowsarTestTerminated[0] -ne 104) { throw 'Custom installation path migration failed' }
     $global:kowsarTestTerminated = @()
+    $global:kowsarTestFixtures = @([pscustomobject]@{ ProcessId = 105; ExecutablePath = 'C:\Users\Original\AppData\Local\rustdesk\rustdesk.exe' })
+    & $script -LegacyCacheDirectory 'C:\Users\Original\AppData\Local\rustdesk'
+    if ($global:kowsarTestTerminated.Count -ne 1 -or $global:kowsarTestTerminated[0] -ne 105) { throw 'Original user cache migration failed' }
+    $global:kowsarTestTerminated = @()
     $global:kowsarTestProduct = 'RustDesk'
-    & $script -InstallDirectory 'D:\Custom KowsarDesk'
+    & $script -LegacyCacheDirectory 'C:\Users\Original\AppData\Local\rustdesk'
     if ($global:kowsarTestTerminated.Count -ne 0) { throw 'Stock RustDesk must remain running' }
-    Write-Output '3 passed: legacy cache and custom installation migrated; unrelated and stock RustDesk preserved.'
+    Write-Output '4 passed: legacy cache, custom installation and original user cache migrated; unrelated and stock RustDesk preserved.'
 } finally {
     $env:LOCALAPPDATA = $originalLocalAppData
 }

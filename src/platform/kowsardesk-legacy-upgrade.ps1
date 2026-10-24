@@ -1,9 +1,12 @@
 # Invoked by the elevated installer, before starting the replacement service.
-param([string]$InstallDirectory = (Join-Path $env:ProgramFiles 'KowsarDesk'))
+param(
+    [string]$InstallDirectory = (Join-Path $env:ProgramFiles 'KowsarDesk'),
+    [string]$LegacyCacheDirectory = (Join-Path $env:LOCALAPPDATA 'rustdesk')
+)
 $ErrorActionPreference = 'Stop'
 try {
     $legacyPaths = @(
-        [IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'rustdesk\rustdesk.exe')),
+        [IO.Path]::GetFullPath((Join-Path $LegacyCacheDirectory 'rustdesk.exe')),
         [IO.Path]::GetFullPath((Join-Path $InstallDirectory 'rustdesk.exe'))
     )
     foreach ($process in @(Get-CimInstance Win32_Process -Filter "Name='rustdesk.exe'")) {
