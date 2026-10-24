@@ -1699,8 +1699,22 @@ copy /Y \"{tmp_path}\\{app_name} Tray.lnk\" \"%PROGRAMDATA%\\Microsoft\\Windows\
     // Remember to check if `update_me` need to be changed if changing the `cmds`.
     // No need to merge the existing dup code, because the code in these two functions are too critical.
     // New code should be written in a common function.
+    let legacy_upgrade = if app_name == "KowsarDesk" {
+        let script = write_cmds(
+            include_str!("kowsardesk-legacy-upgrade.ps1").to_owned(),
+            "ps1",
+            "legacy_upgrade",
+        )?;
+        format!(
+            "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{}\" -InstallDirectory \"{}\"\nif errorlevel 1 exit /b 1",
+            script.to_string_lossy(), path
+        )
+    } else {
+        String::new()
+    };
     let cmds = format!(
         "
+{legacy_upgrade}
 {uninstall_str}
 chcp 65001
 md \"{path}\"

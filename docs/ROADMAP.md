@@ -113,3 +113,47 @@ Changed project files:
 No technical verification blocker remains. Human acceptance on the affected
 user's machine has not been inferred from CI. Next: install the verified Windows
 package on that target machine and confirm its interactive support workflow.
+
+## 2026-10-24: Target-machine portable upgrade diagnosis
+
+The affected machine reproduced the immediate GUI exit. The installed executable
+matched the new release, but librustdesk.dll in both Program Files/KowsarDesk and
+LocalAppData/rustdesk differed from the verified folder artifact. A legacy
+rustdesk.exe process remained in the shared portable cache; GUI logs reported
+Access denied on the KowsarDesk query IPC endpoint and exited with code -1.
+
+Local repair preserved the user's configuration and backed up the installation.
+After replacing and validating all 104 payload files, an elevated termination of
+the legacy cached process and service restart allowed the GUI to stay open.
+The actual portable installer was then rerun with --silent-install. This updated
+the registry BuildDate from the old July build to the October release. The
+portable GUI passed a 30-second stability check. A subsequent launch from
+Program Files also remained open for 30 seconds and its accessibility state
+reported Ready, without the obsolete-installation warning. The service remained
+Running. Both core connection configuration files retained their original hashes.
+
+No application source or release binary changed during this local repair.
+Installation smoke evidence alone does not cover upgrades with a legacy
+rustdesk.exe holding the shared extraction directory. Next: add an upgrade
+regression covering occupied legacy caches and prevent mixed payload extraction;
+also verify an authorized real remote session. Remote-session acceptance has not
+been inferred from GUI readiness.
+
+## 2026-10-24: Portable legacy-upgrade fix (verification in progress)
+
+Portable payloads now extract under LocalAppData/KowsarDesk/portable/<payload-id>,
+independent of the old shared rustdesk directory and of other release payloads.
+Extraction propagates decompression, checksum and filesystem errors rather than
+launching a mixture of old and new files. Existing matching files are reused
+without deleting a directory another running copy may use.
+
+The elevated installer retires rustdesk.exe only at the exact legacy cache or
+selected installation path and only when its ProductName is KowsarDesk. Failure
+to stop that process aborts installation before uninstalling the existing service.
+Stock RustDesk and unrelated paths are excluded. Configuration is preserved.
+
+CI now tests the extraction code and simulates an actual running, DLL-locking
+legacy portable before installation. Uploads require legacy-process retirement,
+complete installed-payload hash checks, service/version checks and a 30-second
+installed GUI check. Build and artifact verification results will be recorded
+after the new run completes. Application version and server settings are unchanged.
