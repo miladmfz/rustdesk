@@ -26,6 +26,18 @@ runner verifies the installed file, running service, binary hash and version.
 Windows artifacts are retained for 30 days; download and extract the artifact ZIP
 before use. Keep all files together for the folder variant.
 
-Local evidence and CI result are pending. Next: obtain successful Windows build
-and installation smoke evidence, then verify installation interactively on the
-affected user's Windows machine. Compilation alone does not close this task.
+Verified locally: 5 packaging regression tests passed, zero failures. Workflow
+YAML, 23 shell script blocks, embedded Python and the PowerShell smoke script
+parsed successfully; git diff --check passed.
+
+CI blocker: GitHub returned HTTP 422, `Actions has been disabled for this
+repository`, when dispatching this branch. Repository permissions already report
+enabled=true and the workflow reports active. Re-enabling the workflow and
+reapplying the existing repository Actions permissions did not resolve it.
+No new Windows/Android binary was produced; installation smoke is unexecuted.
+The existing 1.4.9 application version and upstream baseline remain unchanged.
+
+Next: resolve the GitHub Actions execution restriction, run this branch's
+KowsarDesk workflow and obtain successful Windows build and installation smoke
+evidence, then verify installation interactively on the affected user's Windows
+machine. Compilation alone does not close this task.
