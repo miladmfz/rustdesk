@@ -336,6 +336,14 @@ jobs:
             Write-Host "Printer driver files were skipped."
           }
 
+      - name: Prepare branded Windows executable
+        shell: pwsh
+        run: |
+          python3 .github/scripts/test_kowsardesk_packaging.py
+          if ($LASTEXITCODE -ne 0) { throw 'Packaging regression tests failed' }
+          python3 .github/scripts/prepare-kowsardesk.py rustdesk
+          if ($LASTEXITCODE -ne 0) { throw 'Windows payload preparation failed' }
+
       - name: Verify Windows custom server and public key
         shell: bash
         run: |
@@ -388,14 +396,6 @@ jobs:
           name: topmostwindow-artifacts-x64
           path: ./rustdesk
 
-      - name: Upload Windows x64 folder
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: KowsarDesk-windows-x64-folder
-          path: rustdesk
-          if-no-files-found: error
-          retention-days: 7
-
       - name: Build Windows portable executable
         shell: bash
         run: |
@@ -411,7 +411,7 @@ jobs:
           python3 ./generate.py \
             -f ../../rustdesk/ \
             -o . \
-            -e ../../rustdesk/rustdesk.exe
+            -e ../../rustdesk/KowsarDesk.exe
 
           popd
 
@@ -428,13 +428,53 @@ jobs:
             "$portable_exe" \
             "./KowsarDesk-${{ env.VERSION }}-windows-x64.exe"
 
+          # The packer opens installation UI when its filename ends in install.exe.
+          cp "$portable_exe" "./KowsarDesk-${{ env.VERSION }}-windows-x64-install.exe"
+
+      - name: Smoke test Windows portable installation
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          ./.github/scripts/smoke-kowsardesk-install.ps1 -Installer "KowsarDesk-${{ env.VERSION }}-windows-x64.exe"
+
+      - name: Write Windows executable checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "KowsarDesk-${{ env.VERSION }}-windows-x64*.exe" | ForEach-Object {
+            '{0} *{1}' -f (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
+          } | Set-Content -Path KowsarDesk-windows-SHA256SUMS.txt -Encoding ascii
+
+      - name: Upload Windows x64 folder
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KowsarDesk-windows-x64-folder
+          path: rustdesk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KowsarDesk-windows-x64-installer
+          path: KowsarDesk-${{ env.VERSION }}-windows-x64-install.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Windows checksums
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KowsarDesk-windows-x64-checksums
+          path: KowsarDesk-windows-SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Upload Windows portable executable
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: KowsarDesk-windows-x64-portable
           path: KowsarDesk-${{ env.VERSION }}-windows-x64.exe
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
 
   build-android-arm64:
     name: Android arm64-v8a
