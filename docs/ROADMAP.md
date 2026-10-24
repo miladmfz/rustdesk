@@ -139,7 +139,7 @@ regression covering occupied legacy caches and prevent mixed payload extraction;
 also verify an authorized real remote session. Remote-session acceptance has not
 been inferred from GUI readiness.
 
-## 2026-10-24: Portable legacy-upgrade fix (verification in progress)
+## 2026-10-24: Portable legacy-upgrade fix verified
 
 Portable payloads now extract under LocalAppData/KowsarDesk/portable/<payload-id>,
 independent of the old shared rustdesk directory and of other release payloads.
@@ -155,5 +155,29 @@ Stock RustDesk and unrelated paths are excluded. Configuration is preserved.
 CI now tests the extraction code and simulates an actual running, DLL-locking
 legacy portable before installation. Uploads require legacy-process retirement,
 complete installed-payload hash checks, service/version checks and a 30-second
-installed GUI check. Build and artifact verification results will be recorded
-after the new run completes. Application version and server settings are unchanged.
+installed GUI check. Build and artifact verification results are recorded below.
+Application version and server settings are unchanged.
+
+Verification completed in workflow run 40089911358, source commit
+35626d8d5bc66e94481c33587e41a9acd41deadc. Both Windows x64 and Android arm64 jobs
+succeeded. Fifteen local regression cases passed: six extraction/cache cases,
+four legacy-process policy cases and five packaging cases. The policy cases cover
+an original caller cache passed across elevation, a custom installation path and
+exclusion of stock RustDesk/unrelated paths. The installer sets UTF-8 before
+invoking the migration helper. The same tests also passed in the hosted build.
+
+The hosted Windows smoke confirmed a real legacy-layout rustdesk.exe remained
+alive with librustdesk.dll locked before installation. The installer retired it
+without manual termination, preserved the legacy DLL hash and excluded its
+sentinel file from the installation. Every staged application file matched its
+installed SHA256. The service used the expected path and ran successfully,
+--version returned 1.4.9, and the installed GUI remained open for 30 seconds.
+
+All five release ZIPs were downloaded into
+Downloads/KowsarDesk-1.4.9-upgrade-fix-20261024. Their SHA256 matched GitHub artifact
+metadata and ZIP integrity checks passed. Both Windows executable checksums match
+the published checksums and both PE headers identify x64. verification.json records
+the exact source and successful workflow. No technical blocker remains for this
+packaging/upgrade task. Next: verify an authorized real remote session on a second
+supported Windows computer; session acceptance has not been inferred from the
+installation and GUI checks.
