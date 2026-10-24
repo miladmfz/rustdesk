@@ -181,3 +181,24 @@ the exact source and successful workflow. No technical blocker remains for this
 packaging/upgrade task. Next: verify an authorized real remote session on a second
 supported Windows computer; session acceptance has not been inferred from the
 installation and GUI checks.
+
+## 2026-10-24: Verified portable installed on the affected machine
+
+Installed the verified 35626d8 build by launching the generic portable executable
+with --silent-install while the previous installed GUI, tray and service were
+still running. No test command manually terminated an application process or
+stopped/restarted the service. The installer retired the previous processes,
+updated the native library and registered the new build date itself.
+
+All 104 installed payload files match the verified folder artifact. Both core
+connection configuration files retain their pre-upgrade hashes; configuration
+and installation backups were preserved. The installed GUI stayed open for
+120 seconds with a running service, then accessibility inspection confirmed Ready
+and no obsolete-installation warning. No matching Application crash event was
+recorded during the test. The application was left open for use.
+
+Evidence is saved alongside the release as local-install-verification.json.
+There was no rustdesk.exe process before this particular local test; the occupied
+legacy-cache variant is covered by the successful hosted upgrade regression above.
+No new remote connection was initiated by this test. Next: verify a real remote
+session with an authorized second device.
