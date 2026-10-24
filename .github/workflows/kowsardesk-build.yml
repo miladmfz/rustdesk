@@ -341,6 +341,7 @@ jobs:
         run: |
           python3 .github/scripts/test_kowsardesk_packaging.py
           if ($LASTEXITCODE -ne 0) { throw 'Packaging regression tests failed' }
+            ./.github/scripts/test_kowsardesk_legacy_upgrade.ps1
           python3 .github/scripts/prepare-kowsardesk.py rustdesk
           if ($LASTEXITCODE -ne 0) { throw 'Windows payload preparation failed' }
 
@@ -412,6 +413,8 @@ jobs:
             -f ../../rustdesk/ \
             -o . \
             -e ../../rustdesk/KowsarDesk.exe
+
+            cargo test --locked --release
 
           popd
 

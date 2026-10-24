@@ -17,10 +17,14 @@ const APP_METADATA: &[u8] = include_bytes!("../app_metadata.toml");
 const APP_METADATA: &[u8] = &[];
 const APP_METADATA_CONFIG: &str = "meta.toml";
 const META_LINE_PREFIX_TIMESTAMP: &str = "timestamp = ";
-const APP_PREFIX: &str = "rustdesk";
+const APP_PREFIX: &str = "KowsarDesk";
 const APPNAME_RUNTIME_ENV_KEY: &str = "RUSTDESK_APPNAME";
 #[cfg(windows)]
 const SET_FOREGROUND_WINDOW_ENV_KEY: &str = "SET_FOREGROUND_WINDOW";
+
+fn cache_directory(base: &Path, payload_id: &str) -> PathBuf {
+    base.join(APP_PREFIX).join("portable").join(payload_id)
+}
 
 fn is_timestamp_matches(dir: &Path, ts: &mut u64) -> bool {
     let Ok(app_metadata) = std::str::from_utf8(APP_METADATA) else {
@@ -71,7 +75,7 @@ fn setup(
     } else {
         // home dir
         if let Some(dir) = dirs::data_local_dir() {
-            dir.join(APP_PREFIX)
+            cache_directory(&dir, &reader.cache_id())
         } else {
             eprintln!("not found data local dir");
             return None;
@@ -85,10 +89,14 @@ fn setup(
             *_ui = true;
             ui::setup();
         }
-        std::fs::remove_dir_all(&dir).ok();
+        // Reuse matching files; never delete a directory another running copy uses.
+        // Different embedded payloads already have independent cache directories.
     }
     for file in reader.files.iter() {
-        file.write_to_file(&dir);
+        if let Err(err) = file.write_to_file(&dir) {
+            eprintln!("Cannot extract portable file {}: {}", file.path, err);
+            return None;
+        }
     }
     write_meta(&dir, ts);
     #[cfg(windows)]
@@ -96,6 +104,20 @@ fn setup(
     #[cfg(linux)]
     reader.configure_permission(&dir);
     Some(dir.join(&reader.exe))
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+
+    #[test]
+    fn releases_and_legacy_cache_are_isolated() {
+        let base = Path::new("local-app-data");
+        let first = cache_directory(base, "first-payload");
+        assert_ne!(first, cache_directory(base, "second-payload"));
+        assert!(!first.starts_with(base.join("rustdesk")));
+        assert_eq!(first, base.join("KowsarDesk/portable/first-payload"));
+    }
 }
 
 fn use_null_stdio() -> bool {
@@ -207,6 +229,8 @@ fn main() {
             args = vec!["--quick_support".to_owned()];
         }
         execute(exe, args, ui);
+    } else {
+        std::process::exit(1);
     }
 }
 
