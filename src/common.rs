@@ -2080,7 +2080,42 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
+// Apply the build credential after optional custom files, including early returns.
 pub fn load_custom_client() {
+    load_custom_client_settings();
+    apply_kowsar_preset_password();
+}
+
+fn apply_kowsar_preset_password() {
+    let (Some(password), Some(salt)) = (
+        option_env!("KOWSARDESK_PRESET_PASSWORD_HASH"),
+        option_env!("KOWSARDESK_PRESET_PASSWORD_SALT"),
+    ) else {
+        return;
+    };
+    if salt.is_empty()
+        || !config::preset_permanent_password_storage_is_usable_for_auth(password, salt)
+    {
+        log::error!("Invalid KowsarDesk preset credential configuration");
+        return;
+    }
+    {
+        let mut hard_settings = config::HARD_SETTINGS.write().unwrap();
+        hard_settings.insert("password".to_owned(), password.to_owned());
+        hard_settings.insert("salt".to_owned(), salt.to_owned());
+    }
+    config::BUILTIN_SETTINGS.write().unwrap().insert(
+        config::keys::OPTION_DISABLE_CHANGE_PERMANENT_PASSWORD.to_owned(),
+        "Y".to_owned(),
+    );
+    // The owner requires this preset to replace previously saved passwords too.
+    // Use the supported sync API to clear the local override and retain IDs/keys.
+    if let Err(err) = Config::set_permanent_password_storage_for_sync("", salt) {
+        log::error!("Failed to apply KowsarDesk preset credential: {err}");
+    }
+}
+
+fn load_custom_client_settings() {
     *config::APP_NAME.write().unwrap() = "KowsarDesk".to_owned();
 
     {
@@ -2111,14 +2146,6 @@ pub fn load_custom_client() {
             "use-permanent-password".to_owned(),
         );
         
-    }
-    {
-        let mut hard_settings = config::HARD_SETTINGS.write().unwrap();
-
-        hard_settings.insert(
-            "password".to_owned(),
-            "Aa@123456".to_owned(),
-        );
     }
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
@@ -2218,6 +2245,11 @@ pub fn get_dst_align_rgba() -> usize {
 }
 
 pub fn read_custom_client(config: &str) {
+    read_custom_client_settings(config);
+    apply_kowsar_preset_password();
+}
+
+fn read_custom_client_settings(config: &str) {
     let Ok(data) = decode64(config) else {
         log::error!("Failed to decode custom client config");
         return;

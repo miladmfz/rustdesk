@@ -202,3 +202,22 @@ There was no rustdesk.exe process before this particular local test; the occupie
 legacy-cache variant is covered by the successful hosted upgrade regression above.
 No new remote connection was initiated by this test. Next: verify a real remote
 session with an authorized second device.
+
+## 2026-10-25: Shared preset credential build (verification in progress)
+
+The owner requested the same permanent credential for portable Windows,
+installed Windows and Android, including replacement of previously saved local
+passwords. The plaintext credential is not recorded here or in tracked source.
+The existing supported salted H1 preset format is supplied through encrypted
+GitHub Actions secrets. Client initialization applies it after custom settings,
+clears the prior local password override through the supported sync API and
+disables local permanent-password changes so the approved shared preset remains
+effective. IDs, keys and unrelated settings are retained.
+
+The build validates both secret inputs, scans the Windows native library and
+Android APK native library for the exact configured verifier/salt without printing
+them, and seeds an old local password in the hosted Windows smoke to confirm it
+no longer overrides the preset. Existing portable cache/legacy upgrade and GUI
+checks remain enabled. Eighteen local regression cases passed (nine preset, five
+packaging and four migration policy cases). Full builds and artifact verification
+remain pending; no new runtime or authentication acceptance is inferred yet.

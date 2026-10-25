@@ -44,6 +44,9 @@ jobs:
       - generate-bridge
       - build-topmost-window-x64
     runs-on: windows-2022
+    env:
+      KOWSARDESK_PRESET_PASSWORD_HASH: ${{ secrets.KOWSARDESK_PRESET_PASSWORD_HASH }}
+      KOWSARDESK_PRESET_PASSWORD_SALT: ${{ secrets.KOWSARDESK_PRESET_PASSWORD_SALT }}
 
     steps:
       - name: Export GitHub Actions cache environment variables
@@ -57,6 +60,12 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           submodules: recursive
+
+      - name: Validate hashed preset build inputs
+        shell: bash
+        run: |
+          python3 .github/scripts/test_kowsardesk_preset.py
+          python3 .github/scripts/check-kowsardesk-preset.py
 
       - name: Patch custom server and public key
         shell: bash
@@ -344,6 +353,8 @@ jobs:
             ./.github/scripts/test_kowsardesk_legacy_upgrade.ps1
           python3 .github/scripts/prepare-kowsardesk.py rustdesk
           if ($LASTEXITCODE -ne 0) { throw 'Windows payload preparation failed' }
+          python3 .github/scripts/check-kowsardesk-preset.py rustdesk/librustdesk.dll
+          if ($LASTEXITCODE -ne 0) { throw 'Windows preset payload verification failed' }
 
       - name: Verify Windows custom server and public key
         shell: bash
@@ -484,6 +495,9 @@ jobs:
     needs:
       - generate-bridge
     runs-on: ubuntu-24.04
+    env:
+      KOWSARDESK_PRESET_PASSWORD_HASH: ${{ secrets.KOWSARDESK_PRESET_PASSWORD_HASH }}
+      KOWSARDESK_PRESET_PASSWORD_SALT: ${{ secrets.KOWSARDESK_PRESET_PASSWORD_SALT }}
 
     steps:
       - name: Free disk space
@@ -544,6 +558,12 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           submodules: recursive
+
+      - name: Validate hashed preset build inputs
+        shell: bash
+        run: |
+          python3 .github/scripts/test_kowsardesk_preset.py
+          python3 .github/scripts/check-kowsardesk-preset.py
 
       - name: Patch custom server and public key
         shell: bash
@@ -746,6 +766,11 @@ jobs:
             ../KowsarDesk-${{ env.VERSION }}-android-arm64.apk
 
           popd
+
+      - name: Verify Android hashed preset
+        shell: bash
+        run: |
+          python3 .github/scripts/check-kowsardesk-preset.py --apk "KowsarDesk-${{ env.VERSION }}-android-arm64.apk"
 
       - name: Verify Android APK custom server and public key
         shell: bash
