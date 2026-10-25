@@ -25,10 +25,8 @@ try {
     $legacyProcess = Start-Process -FilePath (Join-Path $legacyRoot 'rustdesk.exe') -WorkingDirectory $legacyRoot -ArgumentList '--tray' -PassThru
     Start-Sleep -Seconds 5
     if ($legacyProcess.HasExited) { throw 'Legacy process fixture did not remain alive.' }
-    $savedConfig = Get-Content -LiteralPath $configFile -Raw
-    if ($savedConfig -notmatch '(?m)^password\s*=\s*""\s*$') { throw 'Previous local password still overrides the build preset.' }
-    $savedSalt = [regex]::Match($savedConfig, '(?m)^salt\s*=\s*"([^"\r\n]*)"').Groups[1].Value
-    if ($savedSalt -cne $env:KOWSARDESK_PRESET_PASSWORD_SALT) { throw 'Persisted password salt differs from the configured preset.' }
+    python3 .github/scripts/check-kowsardesk-preset.py --config $configFile
+    if ($LASTEXITCODE -ne 0) { throw 'Runtime preset override verification failed.' }
     Write-Host 'Previous local password override retired; compiled hashed preset is effective.'
     $locked = $false
     try {

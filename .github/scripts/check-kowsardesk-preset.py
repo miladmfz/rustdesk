@@ -33,11 +33,23 @@ def verify_source(source):
     if re.search(r'hard_settings.insert\(\s*"password".to_owned\(\),\s*"[^"\n]+".to_owned', source):
         raise ValueError('Literal credential found in client source')
 
+def verify_runtime_config(text, expected_salt):
+    # confy/toml pretty serialization uses literal ('') strings where possible.
+    # Compare the values, accepting either supported quoting style.
+    empty = re.search(r'''(?m)^password[ \t]*=[ \t]*(["'])\1[ \t]*$''', text)
+    salt = re.search(r'''(?m)^salt[ \t]*=[ \t]*(["'])([0-9a-f]{32})\1[ \t]*$''', text)
+    if not empty:
+        raise ValueError('Previous local password still overrides the build preset')
+    if not salt or salt[2] != expected_salt:
+        raise ValueError('Persisted password salt differs from configured preset')
+
 if __name__ == '__main__':
     try:
         value, salt = load_preset()
         if len(sys.argv) == 1:
             verify_source(Path('src/common.rs').read_text(encoding='utf-8'))
+        elif sys.argv[1] == '--config':
+            verify_runtime_config(Path(sys.argv[2]).read_text(encoding='utf-8-sig'), salt)
         elif sys.argv[1] == '--apk':
             with ZipFile(sys.argv[2]) as apk:
                 verify_binary(apk.read('lib/arm64-v8a/librustdesk.so'), value, salt)

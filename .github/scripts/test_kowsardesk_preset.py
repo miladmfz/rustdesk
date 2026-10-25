@@ -51,4 +51,18 @@ class PresetTests(unittest.TestCase):
         with self.assertRaises(ValueError): module.verify_source('')
         module.verify_source(Path('src/common.rs').read_text(encoding='utf-8'))
 
+    def test_runtime_double_quoted_empty_override(self):
+        module.verify_runtime_config('password = ""\nsalt = "'+self.salt+'"\n', self.salt)
+
+    def test_runtime_literal_quoted_empty_override(self):
+        module.verify_runtime_config("password = ''\nsalt = '"+self.salt+"'\n", self.salt)
+
+    def test_runtime_saved_password_is_rejected(self):
+        with self.assertRaises(ValueError):
+            module.verify_runtime_config("password = 'old-fixture'\nsalt = '"+self.salt+"'\n", self.salt)
+
+    def test_runtime_mismatching_salt_is_rejected(self):
+        with self.assertRaises(ValueError):
+            module.verify_runtime_config("password = ''\nsalt = '"+'f'*32+"'\n", self.salt)
+
 if __name__ == '__main__': unittest.main()
