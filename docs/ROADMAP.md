@@ -181,3 +181,68 @@ the exact source and successful workflow. No technical blocker remains for this
 packaging/upgrade task. Next: verify an authorized real remote session on a second
 supported Windows computer; session acceptance has not been inferred from the
 installation and GUI checks.
+
+## 2026-10-24: Verified portable installed on the affected machine
+
+Installed the verified 35626d8 build by launching the generic portable executable
+with --silent-install while the previous installed GUI, tray and service were
+still running. No test command manually terminated an application process or
+stopped/restarted the service. The installer retired the previous processes,
+updated the native library and registered the new build date itself.
+
+All 104 installed payload files match the verified folder artifact. Both core
+connection configuration files retain their pre-upgrade hashes; configuration
+and installation backups were preserved. The installed GUI stayed open for
+120 seconds with a running service, then accessibility inspection confirmed Ready
+and no obsolete-installation warning. No matching Application crash event was
+recorded during the test. The application was left open for use.
+
+Evidence is saved alongside the release as local-install-verification.json.
+There was no rustdesk.exe process before this particular local test; the occupied
+legacy-cache variant is covered by the successful hosted upgrade regression above.
+No new remote connection was initiated by this test. Next: verify a real remote
+session with an authorized second device.
+
+## 2026-10-25: Verified shared preset credential build
+
+The owner requested the same permanent credential for portable Windows,
+installed Windows and Android, including replacement of previously saved local
+passwords. The plaintext credential is not recorded here or in tracked source.
+The existing supported salted H1 preset format is supplied through encrypted
+GitHub Actions secrets. Client initialization applies it after custom settings,
+clears the prior local password override through the supported sync API and
+disables local permanent-password changes so the approved shared preset remains
+effective. IDs, keys and unrelated settings are retained.
+
+The build validates both secret inputs, scans the Windows native library and
+Android APK native library for the exact configured verifier/salt without printing
+them, and seeds an old local password in the hosted Windows smoke to confirm it
+no longer overrides the preset. Existing portable cache/legacy upgrade and GUI
+checks remain enabled. Twenty-two local regression cases passed (13 preset, five
+packaging and four migration policy cases). Four preset cases cover both valid
+TOML quote styles and rejection of retained passwords or mismatched salts; the
+smoke checker was corrected after its original double-quote-only assumption
+rejected valid single-quoted configuration output.
+
+Workflow run 40179399416 built source commit
+74ba5dd63eef07b2e1234e63c41b45d5d645cff7. The Windows installation smoke passed:
+the seeded old password override was cleared, its salt matched the compiled
+preset, installation retired the locked legacy process without manual repair,
+all installed payload hashes matched, the service ran, --version returned 1.4.9
+and the GUI stayed open for 30 seconds. Android ARM64 built successfully and its
+native library passed the exact preset verifier/salt check.
+
+All five release artifact ZIPs passed GitHub metadata SHA256 and ZIP integrity
+checks in Downloads/KowsarDesk-1.4.9-preset-20261025-final. Both Windows executable
+checksums and x64 PE headers passed. Deep payload verification confirmed that the
+requested credential produces the verifier embedded in both platform libraries,
+the portable contains exactly the verified folder library, and the installer
+alias has the same payload. The plaintext credential was absent from all staged
+Windows files and every uncompressed APK member. verification.json records the
+exact successful workflow/source and verification scope without secret values.
+
+The owner accepted a fresh Android installation because prior APKs used different
+signing certificates. Physical Android runtime and a real remote authentication
+session have not been tested; neither is inferred from build or Windows smoke
+results. Next: test the delivered APK on an authorized Android device and verify
+a remote session between two supported devices.

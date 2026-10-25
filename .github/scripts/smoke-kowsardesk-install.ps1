@@ -10,6 +10,12 @@ $legacyRoot = Join-Path $env:LOCALAPPDATA 'rustdesk'
 if (Test-Path -LiteralPath $legacyRoot) { throw 'Smoke test requires an unused legacy cache.' }
 $legacyProcess = $null
 try {
+    # Prove the new build replaces an already saved permanent password.
+    $configDir = Join-Path $env:APPDATA 'KowsarDesk\config'
+    $configFile = Join-Path $configDir 'KowsarDesk.toml'
+    if (Test-Path -LiteralPath $configFile) { throw 'Password smoke requires a clean user profile.' }
+    New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+    @('password = "previous-fixture-password"', 'salt = "previous-fixture-salt"') | Set-Content -LiteralPath $configFile -Encoding utf8
     # Reproduce the old package: rustdesk.exe keeps a native DLL locked in the
     # shared cache. A leftover file must never be copied into the new installation.
     Copy-Item -LiteralPath 'rustdesk' -Destination $legacyRoot -Recurse
@@ -19,6 +25,9 @@ try {
     $legacyProcess = Start-Process -FilePath (Join-Path $legacyRoot 'rustdesk.exe') -WorkingDirectory $legacyRoot -ArgumentList '--tray' -PassThru
     Start-Sleep -Seconds 5
     if ($legacyProcess.HasExited) { throw 'Legacy process fixture did not remain alive.' }
+    python3 .github/scripts/check-kowsardesk-preset.py --config $configFile
+    if ($LASTEXITCODE -ne 0) { throw 'Runtime preset override verification failed.' }
+    Write-Host 'Previous local password override retired; compiled hashed preset is effective.'
     $locked = $false
     try {
         $handle = [IO.File]::Open((Join-Path $legacyRoot 'librustdesk.dll'), 'Open', 'ReadWrite', 'None')
