@@ -203,7 +203,7 @@ legacy-cache variant is covered by the successful hosted upgrade regression abov
 No new remote connection was initiated by this test. Next: verify a real remote
 session with an authorized second device.
 
-## 2026-10-25: Shared preset credential build (verification in progress)
+## 2026-10-25: Verified shared preset credential build
 
 The owner requested the same permanent credential for portable Windows,
 installed Windows and Android, including replacement of previously saved local
@@ -218,6 +218,31 @@ The build validates both secret inputs, scans the Windows native library and
 Android APK native library for the exact configured verifier/salt without printing
 them, and seeds an old local password in the hosted Windows smoke to confirm it
 no longer overrides the preset. Existing portable cache/legacy upgrade and GUI
-checks remain enabled. Eighteen local regression cases passed (nine preset, five
-packaging and four migration policy cases). Full builds and artifact verification
-remain pending; no new runtime or authentication acceptance is inferred yet.
+checks remain enabled. Twenty-two local regression cases passed (13 preset, five
+packaging and four migration policy cases). Four preset cases cover both valid
+TOML quote styles and rejection of retained passwords or mismatched salts; the
+smoke checker was corrected after its original double-quote-only assumption
+rejected valid single-quoted configuration output.
+
+Workflow run 40179399416 built source commit
+74ba5dd63eef07b2e1234e63c41b45d5d645cff7. The Windows installation smoke passed:
+the seeded old password override was cleared, its salt matched the compiled
+preset, installation retired the locked legacy process without manual repair,
+all installed payload hashes matched, the service ran, --version returned 1.4.9
+and the GUI stayed open for 30 seconds. Android ARM64 built successfully and its
+native library passed the exact preset verifier/salt check.
+
+All five release artifact ZIPs passed GitHub metadata SHA256 and ZIP integrity
+checks in Downloads/KowsarDesk-1.4.9-preset-20261025-final. Both Windows executable
+checksums and x64 PE headers passed. Deep payload verification confirmed that the
+requested credential produces the verifier embedded in both platform libraries,
+the portable contains exactly the verified folder library, and the installer
+alias has the same payload. The plaintext credential was absent from all staged
+Windows files and every uncompressed APK member. verification.json records the
+exact successful workflow/source and verification scope without secret values.
+
+The owner accepted a fresh Android installation because prior APKs used different
+signing certificates. Physical Android runtime and a real remote authentication
+session have not been tested; neither is inferred from build or Windows smoke
+results. Next: test the delivered APK on an authorized Android device and verify
+a remote session between two supported devices.
