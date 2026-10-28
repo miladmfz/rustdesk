@@ -167,6 +167,9 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           architecture: x64
 
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
+
       - name: Replace engine with RustDesk custom Flutter engine
         shell: pwsh
         run: |
@@ -652,6 +655,9 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ env.ANDROID_FLUTTER_VERSION }}
+
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
 
       - name: Patch Flutter
         shell: bash
