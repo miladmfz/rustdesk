@@ -260,6 +260,20 @@ KowsarDesk's native version checker and automatic installer return before
 contacting the official RustDesk release service. Stale update URLs are cleared,
 and the unavailable upstream update switches are hidden on desktop and mobile.
 No dedicated KowsarDesk update feed exists yet; updates are manual custom builds.
-Other application names retain upstream behavior. Builds and runtime smoke are
-pending; 10000 generated candidates passed the actual server-format contract
-without a duplicate in the local test. No live device ID has been changed.
+Other application names retain upstream behavior. Run 40682524763 successfully
+built Windows x64 and Android ARM64 from ff933f2fb1d373d2db58adece1d649fb97ad59d3.
+The 10000-candidate format/uniqueness contract passed locally and in Windows CI.
+Its workflow step was accidentally duplicated in Windows rather than added to
+Android; the step placement was corrected for future runs after this build.
+No client application code changed after the successful build.
+
+The hosted Windows installation, legacy-process migration, preset-override
+retirement, payload hashes, service/version and 30-second GUI smoke passed.
+All five downloaded ZIPs matched GitHub SHA256 metadata and passed ZIP integrity;
+the native preset hash/salt matched the previously verified release in Windows
+and Android, and both Windows launchers embed the verified folder library.
+Files are in Downloads/KowsarDesk-1.4.9-random-id-20261028 with verification.json.
+The owner explicitly requested files only, declining local installation/testing.
+No live device ID has been changed; real ID reassignment and physical Android
+runtime remain untested. Next: owner-authorized validation on a duplicate-ID
+device, followed by a dedicated KowsarDesk release feed if requested.

@@ -189,9 +189,6 @@ jobs:
             -Destination "C:/hostedtoolcache/windows/flutter/stable-${{ env.FLUTTER_VERSION }}-x64/bin/cache/artifacts/engine/windows-x64-release/" `
             -Force
 
-      - name: Verify random client ID contract
-        run: dart flutter/test/random_client_id_smoke.dart
-
       - name: Patch Flutter
         shell: bash
         run: |
@@ -658,6 +655,9 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ env.ANDROID_FLUTTER_VERSION }}
+
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
 
       - name: Patch Flutter
         shell: bash
