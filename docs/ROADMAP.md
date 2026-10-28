@@ -246,3 +246,20 @@ signing certificates. Physical Android runtime and a real remote authentication
 session have not been tested; neither is inferred from build or Windows smoke
 results. Next: test the delivered APK on an authorized Android device and verify
 a remote session between two supported devices.
+
+## 2026-10-28: Random client ID and upstream update isolation (in progress)
+
+The owner requested random IDs for duplicate-ID devices. The existing Change ID
+dialog now generates a secure random letter-prefixed 16-character candidate;
+the owner must confirm OK before the supported server-mediated change applies.
+This retains connection settings and keys rather than deleting configuration.
+The existing security-settings unlock and connected-server requirements remain.
+The server can reject a candidate and the user can generate another one.
+
+KowsarDesk's native version checker and automatic installer return before
+contacting the official RustDesk release service. Stale update URLs are cleared,
+and the unavailable upstream update switches are hidden on desktop and mobile.
+No dedicated KowsarDesk update feed exists yet; updates are manual custom builds.
+Other application names retain upstream behavior. Builds and runtime smoke are
+pending; 10000 generated candidates passed the actual server-format contract
+without a duplicate in the local test. No live device ID has been changed.

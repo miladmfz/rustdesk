@@ -167,6 +167,9 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           architecture: x64
 
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
+
       - name: Replace engine with RustDesk custom Flutter engine
         shell: pwsh
         run: |
@@ -185,6 +188,9 @@ jobs:
             -Path "windows-x64-release/*" `
             -Destination "C:/hostedtoolcache/windows/flutter/stable-${{ env.FLUTTER_VERSION }}-x64/bin/cache/artifacts/engine/windows-x64-release/" `
             -Force
+
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
 
       - name: Patch Flutter
         shell: bash
