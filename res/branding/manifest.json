@@ -1,0 +1,379 @@
+{
+  "master_sha256": "b31ac66933cb2238d4f4decbf6ad9b5bf7834adf28b3b45445460a27f9e3e71e",
+  "assets": {
+    "res/icon.png": {
+      "size": [
+        1024,
+        1024
+      ],
+      "sha256": "674c7e5ca5f12ccdbe6386d0e46610c4be5c3a9dbad9f6bde411db2da9d00b5c"
+    },
+    "res/mac-icon.png": {
+      "size": [
+        1024,
+        1024
+      ],
+      "sha256": "674c7e5ca5f12ccdbe6386d0e46610c4be5c3a9dbad9f6bde411db2da9d00b5c"
+    },
+    "res/32x32.png": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "efee117c8bdc0297d101a768908738b082501a50a5c8fac9db8f889f0fbe3b48"
+    },
+    "res/64x64.png": {
+      "size": [
+        64,
+        64
+      ],
+      "sha256": "87fbc11c42c4639e3ff9ddf8302cac656ad3bdb571a530765088737757aca793"
+    },
+    "res/128x128.png": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "84111855d8648eb3bc86e0d68ef4e6f16ae8ffb2812450540b5360581fa788fa"
+    },
+    "res/128x128@2x.png": {
+      "size": [
+        256,
+        256
+      ],
+      "sha256": "127632e2f393bd4b4ddf50602ec260ce1bec8493f0d0ac38de51d87d828fb876"
+    },
+    "flutter/assets/icon.png": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "1df1932b90ab92d3b136d35e7bbb2e85821499ad63ff7b6eaf7bbbe46a6c0645"
+    },
+    "fastlane/metadata/android/en-US/images/icon.png": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "1df1932b90ab92d3b136d35e7bbb2e85821499ad63ff7b6eaf7bbbe46a6c0645"
+    },
+    "res/icon.ico": {
+      "ico_sizes": [
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        128,
+        256
+      ],
+      "sha256": "62d6838113d98826dd897f64038274fa4d16afd0c65c1585d014ad6383873aa1"
+    },
+    "res/tray-icon.ico": {
+      "ico_sizes": [
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        128,
+        256
+      ],
+      "sha256": "62d6838113d98826dd897f64038274fa4d16afd0c65c1585d014ad6383873aa1"
+    },
+    "flutter/windows/runner/resources/app_icon.ico": {
+      "ico_sizes": [
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        128,
+        256
+      ],
+      "sha256": "62d6838113d98826dd897f64038274fa4d16afd0c65c1585d014ad6383873aa1"
+    },
+    "flutter/android/app/src/main/res/mipmap-mdpi/ic_launcher.png": {
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "4bc8a3919d0c0856205cd9fbe83f952543c55d1ba6d2046655e9c80ace39c6ff"
+    },
+    "flutter/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png": {
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "4bc8a3919d0c0856205cd9fbe83f952543c55d1ba6d2046655e9c80ace39c6ff"
+    },
+    "flutter/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png": {
+      "size": [
+        108,
+        108
+      ],
+      "sha256": "d8a84bf08b0a2013a0507add5c7c22e733487067ee656cc8b98c00d5fac37e62"
+    },
+    "flutter/android/app/src/main/res/mipmap-mdpi/ic_stat_logo.png": {
+      "size": [
+        24,
+        24
+      ],
+      "sha256": "39c2dcc21dbd0d7b649ac849a7a42aaa7812d901de7d4651a65189b09bd840db"
+    },
+    "flutter/android/app/src/main/res/mipmap-hdpi/ic_launcher.png": {
+      "size": [
+        72,
+        72
+      ],
+      "sha256": "570507182e8ff365aa87ecd4802b8db646408ac83a718e69cfc1f6d319af3abf"
+    },
+    "flutter/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png": {
+      "size": [
+        72,
+        72
+      ],
+      "sha256": "570507182e8ff365aa87ecd4802b8db646408ac83a718e69cfc1f6d319af3abf"
+    },
+    "flutter/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png": {
+      "size": [
+        162,
+        162
+      ],
+      "sha256": "cbf93ab33cbcee3d231e0e7750545ac333a2c13965dacc85df6b015df6843348"
+    },
+    "flutter/android/app/src/main/res/mipmap-hdpi/ic_stat_logo.png": {
+      "size": [
+        36,
+        36
+      ],
+      "sha256": "1fcc5ea14f75e74e668a626480902a3973aed0922db22887f6341307a1d963b6"
+    },
+    "flutter/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png": {
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "5c2088abbd997d3812eb9a5cd501921354d1fd8059e7036638f3aa3bcd673e12"
+    },
+    "flutter/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png": {
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "5c2088abbd997d3812eb9a5cd501921354d1fd8059e7036638f3aa3bcd673e12"
+    },
+    "flutter/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png": {
+      "size": [
+        216,
+        216
+      ],
+      "sha256": "94f82bc846c12320060c2c8ee1944d341e44abd00a8ad5dc0acae1ee69818b6c"
+    },
+    "flutter/android/app/src/main/res/mipmap-xhdpi/ic_stat_logo.png": {
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "5b83114a29d2035d4634cb8fa790e805088e4ae68e037cf144d26225ad2603dc"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png": {
+      "size": [
+        144,
+        144
+      ],
+      "sha256": "21c9d5078f598c8958d6959f85d5ce85f9aeaa8e2646794b9a1554367e3467bb"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png": {
+      "size": [
+        144,
+        144
+      ],
+      "sha256": "21c9d5078f598c8958d6959f85d5ce85f9aeaa8e2646794b9a1554367e3467bb"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png": {
+      "size": [
+        324,
+        324
+      ],
+      "sha256": "8a3259a5906b3a89e9227ed54aa9a7928e9002cc884454fa01c2f9f764112c46"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxhdpi/ic_stat_logo.png": {
+      "size": [
+        72,
+        72
+      ],
+      "sha256": "2956f43fb0cadabee7223132d8639fdcd8f133d118d343103cb4a7d7ee1b9909"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": {
+      "size": [
+        192,
+        192
+      ],
+      "sha256": "f4f7c12ecdfb0494958f15b3e63a86dd477eff076134600bcf6c1fb02cbc3998"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png": {
+      "size": [
+        192,
+        192
+      ],
+      "sha256": "f4f7c12ecdfb0494958f15b3e63a86dd477eff076134600bcf6c1fb02cbc3998"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png": {
+      "size": [
+        432,
+        432
+      ],
+      "sha256": "57aa5415bbf8b89d950fe18788fe0fbe171a6f1fd4c1f3e38e228d989d7dfdbf"
+    },
+    "flutter/android/app/src/main/res/mipmap-xxxhdpi/ic_stat_logo.png": {
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "9627bc9487f882cd5074df74f5f61907ca1cf0dbb925cf09c08529a0dd185eb7"
+    },
+    "flutter/assets/logo.png": {
+      "size": [
+        600,
+        120
+      ],
+      "sha256": "44aa60607d3f2e5d5905ae4773807955fedae61002c32e0c42cbb891ce227ffc"
+    },
+    "flutter/assets/logo_light.png": {
+      "size": [
+        600,
+        120
+      ],
+      "sha256": "44aa60607d3f2e5d5905ae4773807955fedae61002c32e0c42cbb891ce227ffc"
+    },
+    "flutter/assets/logo_dark.png": {
+      "size": [
+        600,
+        120
+      ],
+      "sha256": "bfb9b8849605dd2b88633011228fd73a0089aa31c93078545442c94abdbb5777"
+    },
+    "libs/portable/src/res/label.png": {
+      "size": [
+        96,
+        32
+      ],
+      "sha256": "6a7d6759d61a8fe7f5930aa4cc5d8081169d432118a36129d83fbe548bcc2821"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png": {
+      "size": [
+        1024,
+        1024
+      ],
+      "sha256": "047f448696ea897af8b89cb9b80956222e1be54ba10f1efff6d6ff7be07bc4d3"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png": {
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "983ab6ca0f043e0778623b94fab83f8e31d190ec1d6f63f574d679e04ef998e1"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png": {
+      "size": [
+        40,
+        40
+      ],
+      "sha256": "2795a2b161b5dc532010e92a7407edbe86fd6281d722bfa241334312776c70ca"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png": {
+      "size": [
+        60,
+        60
+      ],
+      "sha256": "52b6abaeb3033b1eb6d1dcf8207605beabb7d88ede4bd9f900c2e6cd7d1aa0bc"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png": {
+      "size": [
+        29,
+        29
+      ],
+      "sha256": "ec30c75ef7710ea4197ee8cfd4fd476b45b002d2514271b96aad00c7744e2261"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png": {
+      "size": [
+        58,
+        58
+      ],
+      "sha256": "f890fe8488341b6c76cc4e92aac91e82d1c1f397793fd4d51feb10235d2b17a1"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png": {
+      "size": [
+        87,
+        87
+      ],
+      "sha256": "1342f36d768d7af30d5001e245849ae41a0eb06e7b5aee5354b8509902b1389f"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png": {
+      "size": [
+        40,
+        40
+      ],
+      "sha256": "2795a2b161b5dc532010e92a7407edbe86fd6281d722bfa241334312776c70ca"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png": {
+      "size": [
+        80,
+        80
+      ],
+      "sha256": "2bc1ac7a7455878c9dc0a6db069d187e63e53cf14bde271c5a6c21893a326e3e"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png": {
+      "size": [
+        120,
+        120
+      ],
+      "sha256": "668c3efc67a31ad79e4b0bf5fd6cc6d0925eb7fed8083c3631c8506e462bb04b"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png": {
+      "size": [
+        120,
+        120
+      ],
+      "sha256": "668c3efc67a31ad79e4b0bf5fd6cc6d0925eb7fed8083c3631c8506e462bb04b"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png": {
+      "size": [
+        180,
+        180
+      ],
+      "sha256": "bd0d01bbec38407bb4be6cf5cd87e2945ebaebef3644ea43005372d0931863f2"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png": {
+      "size": [
+        76,
+        76
+      ],
+      "sha256": "3fcd37f2dc628409b21d837f10dc929cfb93ef11478288a46e1889af077312f9"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png": {
+      "size": [
+        152,
+        152
+      ],
+      "sha256": "a4e3a91b05754a2940c15a2475c82e902bc05b1fa85b98a94beeee87aa300cf6"
+    },
+    "flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png": {
+      "size": [
+        167,
+        167
+      ],
+      "sha256": "265eab6a1a337c26a12b028c49d5ed4d438507050defca80314df107e5b1f3ce"
+    },
+    "flutter/macos/Runner/AppIcon.icns": {
+      "sha256": "d5617f97501dffe50eaa172e0697876b72aa5ea976bc36e6a5297f8dc239edb1"
+    }
+  }
+}

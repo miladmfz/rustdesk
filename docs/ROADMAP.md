@@ -277,3 +277,20 @@ The owner explicitly requested files only, declining local installation/testing.
 No live device ID has been changed; real ID reassignment and physical Android
 runtime remain untested. Next: owner-authorized validation on a duplicate-ID
 device, followed by a dedicated KowsarDesk release feed if requested.
+
+## 2026-11-05: Approved connection branding (build in progress)
+
+The owner approved the steel-blue K, monitor outline and gold bidirectional badge
+and requested integration into all client assets and fresh Windows/Android builds.
+The approved transparent master is res/branding/kowsardesk-master.png. Derived
+assets cover Windows executable/portable/tray ICO frames from 16 to 256 pixels,
+Flutter launcher and light/dark wordmarks, portable splash, Android launchers and
+adaptive foregrounds across five densities, and white notification silhouettes.
+Existing iOS and macOS source icon assets are kept consistent, but those platforms
+are not build deliverables. The ignored Flutter custom PNGs are explicitly tracked.
+
+Fifty-one derived files have a SHA256/dimension manifest checked locally and in
+both build jobs before compilation. Workflow/script validation passed. The random
+ID feature, official-update isolation, preset credential and migration checks are
+retained. Full client builds and downloaded-payload verification remain pending.
+The owner requested final files only; do not install on the current machine.

@@ -64,6 +64,7 @@ jobs:
       - name: Validate hashed preset build inputs
         shell: bash
         run: |
+          python3 .github/scripts/check-kowsardesk-branding.py
           python3 .github/scripts/test_kowsardesk_preset.py
           python3 .github/scripts/check-kowsardesk-preset.py
 
@@ -565,6 +566,7 @@ jobs:
       - name: Validate hashed preset build inputs
         shell: bash
         run: |
+          python3 .github/scripts/check-kowsardesk-branding.py
           python3 .github/scripts/test_kowsardesk_preset.py
           python3 .github/scripts/check-kowsardesk-preset.py
 
