@@ -16,6 +16,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_hbb/utils/http_service.dart' as http;
 
 import '../../common.dart';
+import '../random_client_id.dart';
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import 'address_book.dart';
@@ -127,6 +128,17 @@ void changeIdDialog() {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(translate("id_change_tip")),
+          TextButton.icon(
+            icon: const Icon(Icons.shuffle),
+            label: Text(translate('Generate random ID')),
+            onPressed: isInProgress ? null : () {
+              setState(() {
+                controller.text = generateRandomClientId();
+                rxId.value = controller.text;
+                msg = '';
+              });
+            },
+          ),
           const SizedBox(
             height: 12.0,
           ),

@@ -246,3 +246,68 @@ signing certificates. Physical Android runtime and a real remote authentication
 session have not been tested; neither is inferred from build or Windows smoke
 results. Next: test the delivered APK on an authorized Android device and verify
 a remote session between two supported devices.
+
+## 2026-10-28: Random client ID and upstream update isolation (in progress)
+
+The owner requested random IDs for duplicate-ID devices. The existing Change ID
+dialog now generates a secure random letter-prefixed 16-character candidate;
+the owner must confirm OK before the supported server-mediated change applies.
+This retains connection settings and keys rather than deleting configuration.
+The existing security-settings unlock and connected-server requirements remain.
+The server can reject a candidate and the user can generate another one.
+
+KowsarDesk's native version checker and automatic installer return before
+contacting the official RustDesk release service. Stale update URLs are cleared,
+and the unavailable upstream update switches are hidden on desktop and mobile.
+No dedicated KowsarDesk update feed exists yet; updates are manual custom builds.
+Other application names retain upstream behavior. Run 40682524763 successfully
+built Windows x64 and Android ARM64 from ff933f2fb1d373d2db58adece1d649fb97ad59d3.
+The 10000-candidate format/uniqueness contract passed locally and in Windows CI.
+Its workflow step was accidentally duplicated in Windows rather than added to
+Android; the step placement was corrected for future runs after this build.
+No client application code changed after the successful build.
+
+The hosted Windows installation, legacy-process migration, preset-override
+retirement, payload hashes, service/version and 30-second GUI smoke passed.
+All five downloaded ZIPs matched GitHub SHA256 metadata and passed ZIP integrity;
+the native preset hash/salt matched the previously verified release in Windows
+and Android, and both Windows launchers embed the verified folder library.
+Files are in Downloads/KowsarDesk-1.4.9-random-id-20261028 with verification.json.
+The owner explicitly requested files only, declining local installation/testing.
+No live device ID has been changed; real ID reassignment and physical Android
+runtime remain untested. Next: owner-authorized validation on a duplicate-ID
+device, followed by a dedicated KowsarDesk release feed if requested.
+
+## 2026-11-05: Approved connection branding (verified 2026-11-07)
+
+The owner approved the steel-blue K, monitor outline and gold bidirectional badge
+and requested integration into all client assets and fresh Windows/Android builds.
+The approved transparent master is res/branding/kowsardesk-master.png. Derived
+assets cover Windows executable/portable/tray ICO frames from 16 to 256 pixels,
+Flutter launcher and light/dark wordmarks, portable splash, Android launchers and
+adaptive foregrounds across five densities, and white notification silhouettes.
+Existing iOS and macOS source icon assets are kept consistent, but those platforms
+are not build deliverables. The ignored Flutter custom PNGs are explicitly tracked.
+
+Fifty-one derived files have a SHA256/dimension manifest checked locally and in
+both build jobs before compilation. Workflow/script validation passed. The random
+ID feature, official-update isolation, preset credential and migration checks are
+retained. Workflow 42360022778 successfully built Windows x64 and Android ARM64
+from 359b641badf6278a7f26e475b7578f1ab0a4db6f after the owner signed in and the
+fork-specific Actions restriction was re-enabled. Hosted Windows installation,
+locked legacy-process migration, preset retirement, payload hashes, service,
+version and 30-second GUI smoke all passed.
+
+All five artifact ZIPs matched GitHub SHA256 metadata and passed ZIP integrity.
+Downloaded Windows runner and portable PE resources contain all nine exact new
+ICO frames; the native library contains the approved tray icon, and the portable
+embeds that same verified library. Both platforms retain the previous preset.
+Four Flutter PNGs match in Windows and APK, and all 20 expected Android image
+variants match decoded APK resources. Android release optimization renames resource
+files, so the external verifier compares decoded image content rather than names.
+
+Delivery is Downloads/KowsarDesk-1.4.9-branding-20261107 with all three clients,
+SHA256 sums and verification.json. The owner requested files only; no installation
+or live device ID change was performed on this machine. Physical Android runtime
+and real remote authentication remain untested. Next: owner-authorized real-device
+installation/visual acceptance and duplicate-ID reassignment verification.

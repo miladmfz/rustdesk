@@ -37,6 +37,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("Clipboard is empty", "کلیپبورد خالی است"),
         ("Stop service", "توقف سرویس"),
         ("Change ID", "تعویض شناسه"),
+        ("Generate random ID", "ساخت شناسه تصادفی جدید"),
         ("Your new ID", "جدید ID"),
         ("length %min% to %max%", "%max% تا %min% طول از"),
         ("starts with a letter", "با حرف شروع می شود"),

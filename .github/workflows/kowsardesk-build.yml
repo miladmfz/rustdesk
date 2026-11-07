@@ -64,6 +64,7 @@ jobs:
       - name: Validate hashed preset build inputs
         shell: bash
         run: |
+          python3 .github/scripts/check-kowsardesk-branding.py
           python3 .github/scripts/test_kowsardesk_preset.py
           python3 .github/scripts/check-kowsardesk-preset.py
 
@@ -166,6 +167,9 @@ jobs:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
           architecture: x64
+
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
 
       - name: Replace engine with RustDesk custom Flutter engine
         shell: pwsh
@@ -562,6 +566,7 @@ jobs:
       - name: Validate hashed preset build inputs
         shell: bash
         run: |
+          python3 .github/scripts/check-kowsardesk-branding.py
           python3 .github/scripts/test_kowsardesk_preset.py
           python3 .github/scripts/check-kowsardesk-preset.py
 
@@ -652,6 +657,9 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ env.ANDROID_FLUTTER_VERSION }}
+
+      - name: Verify random client ID contract
+        run: dart flutter/test/random_client_id_smoke.dart
 
       - name: Patch Flutter
         shell: bash
