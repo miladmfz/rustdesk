@@ -278,7 +278,7 @@ No live device ID has been changed; real ID reassignment and physical Android
 runtime remain untested. Next: owner-authorized validation on a duplicate-ID
 device, followed by a dedicated KowsarDesk release feed if requested.
 
-## 2026-11-05: Approved connection branding (build in progress)
+## 2026-11-05: Approved connection branding (verified 2026-11-07)
 
 The owner approved the steel-blue K, monitor outline and gold bidirectional badge
 and requested integration into all client assets and fresh Windows/Android builds.
@@ -292,5 +292,22 @@ are not build deliverables. The ignored Flutter custom PNGs are explicitly track
 Fifty-one derived files have a SHA256/dimension manifest checked locally and in
 both build jobs before compilation. Workflow/script validation passed. The random
 ID feature, official-update isolation, preset credential and migration checks are
-retained. Full client builds and downloaded-payload verification remain pending.
-The owner requested final files only; do not install on the current machine.
+retained. Workflow 42360022778 successfully built Windows x64 and Android ARM64
+from 359b641badf6278a7f26e475b7578f1ab0a4db6f after the owner signed in and the
+fork-specific Actions restriction was re-enabled. Hosted Windows installation,
+locked legacy-process migration, preset retirement, payload hashes, service,
+version and 30-second GUI smoke all passed.
+
+All five artifact ZIPs matched GitHub SHA256 metadata and passed ZIP integrity.
+Downloaded Windows runner and portable PE resources contain all nine exact new
+ICO frames; the native library contains the approved tray icon, and the portable
+embeds that same verified library. Both platforms retain the previous preset.
+Four Flutter PNGs match in Windows and APK, and all 20 expected Android image
+variants match decoded APK resources. Android release optimization renames resource
+files, so the external verifier compares decoded image content rather than names.
+
+Delivery is Downloads/KowsarDesk-1.4.9-branding-20261107 with all three clients,
+SHA256 sums and verification.json. The owner requested files only; no installation
+or live device ID change was performed on this machine. Physical Android runtime
+and real remote authentication remain untested. Next: owner-authorized real-device
+installation/visual acceptance and duplicate-ID reassignment verification.
